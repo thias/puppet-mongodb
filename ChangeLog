@@ -1,4 +1,7 @@
+2013-05-20 - 0.1.1
 * Add support for overriding package, service and configuration file names.
+* Update README and use markdown
+* Change to 2-space indent
 
 2012-12-18 - 0.1.0
 * Add replSet option.

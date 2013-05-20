@@ -9,13 +9,14 @@
 #  include mongodb::params
 #
 class mongodb::params {
-    # The easy bunch
-    $service = 'mongod'
-    $conffile = '/etc/mongodb.conf'
-    # package
-    case $::operatingsystem {
-        'Gentoo': { $package = 'dev-db/mongodb' }
-         default: { $package = 'mongodb-server' }
-    }
+  # The easy bunch
+  $service = 'mongod'
+  $conffile = '/etc/mongodb.conf'
+  # package
+  case $::operatingsystem {
+    'Gentoo': { $package = 'dev-db/mongodb' }
+    default:  { $package = 'mongodb-server' }
+  }
   
 }
+
