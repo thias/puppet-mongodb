@@ -1,3 +1,6 @@
+2013-06-13 - 0.1.2
+* Fix the service name for Debian and Ubuntu.
+
 2013-05-20 - 0.1.1
 * Add support for overriding package, service and configuration file names.
 * Update README and use markdown
