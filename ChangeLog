@@ -1,3 +1,5 @@
+* Lowercase parameters in missing places.
+
 #### 2014-12-22 - 1.0.0
 * Add conf template for 2.6 (RHEL7).
 * Lowercase all parameters, and default them to undef.

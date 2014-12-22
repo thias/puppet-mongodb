@@ -141,8 +141,8 @@ autoresync = <%= @autoresync %>
 #autoresync
 <% end -%>
 # Custom size for replication operation log.
-<% if @oplogSize -%>
-oplogSize = <%= @oplogSize %>
+<% if @oplogsize -%>
+oplogSize = <%= @oplogsize %>
 <% else -%>
 #oplogSize = <MB>
 <% end -%>
@@ -155,11 +155,11 @@ opIdMem = <%= @opidmem %>
 <% if @rest -%>
 rest = <%= @rest %>
 <% end -%>
-<% if @replSet -%>
-replSet = <%= @replSet %>
+<% if @replset -%>
+replSet = <%= @replset %>
 <% end -%>
-<% if @keyFile -%>
-keyFile = <%= @keyFile %>
+<% if @keyfile -%>
+keyFile = <%= @keyfile %>
 <% end -%>
 <% if @smallfiles -%>
 smallfiles = <%= @smallfiles %>
