@@ -1,3 +1,10 @@
+* Add conf template for 2.6 (RHEL7).
+* Lowercase all parameters, and default them to undef.
+* Add extra_options hash to set any options in the conf file.
+* Install the client package too.
+* Fix require and notify in the key definition.
+* Cosmetic cleanups.
+
 2013-06-13 - 0.1.2
 * Fix the service name for Debian and Ubuntu.
 

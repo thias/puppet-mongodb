@@ -15,39 +15,42 @@
 #
 class mongodb (
   # From the params
-  $service        = $mongodb::params::service,
-  $conffile       = $mongodb::params::conffile,
-  $package        = $mongodb::params::package,
+  $service        = $::mongodb::params::service,
+  $conffile       = $::mongodb::params::conffile,
+  $package        = $::mongodb::params::package,
+  $template       = $::mongodb::params::template,
+  $pidfilepath    = $::mongodb::params::pidfilepath,
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
   $logpath        = '/var/log/mongodb/mongodb.log',
   $bind_ip        = '127.0.0.1',
   $port           = '27017',
   $dbpath         = '/var/lib/mongodb',
-  $auth           = 'false',
-  $verbose        = 'false',
-  $objcheck       = 'false',
-  $quota          = 'false',
-  $oplog          = '0',
-  $slave          = 'false',
-  $master         = 'false',
+  $auth           = undef,
+  $verbose        = undef,
+  $objcheck       = undef,
+  $quota          = undef,
+  $oplog          = undef,
+  $slave          = undef,
+  $master         = undef,
   $source         = undef,
   $pairwith       = undef,
   $arbiter        = undef,
   $autoresync     = undef,
   $oplogSize      = undef,
-  $opIdMem        = undef,
+  $opidmem        = undef,
   $rest           = undef,
   $replSet        = undef,
   $keyFile        = undef,
-  $smallfiles     = undef
-) inherits mongodb::params {
+  $smallfiles     = undef,
+  $extra_options  = {},
+) inherits ::mongodb::params {
 
   # Main package and service
-  package { $package: ensure => installed }
+  package { $package: ensure => 'installed' }
   service { $service:
+    ensure    => 'running',
     enable    => true,
-    ensure    => running,
     hasstatus => true,
     subscribe => File[$conffile],
     require   => Package[$package],
@@ -55,7 +58,10 @@ class mongodb (
 
   # Main configuration file
   file { $conffile:
-    content => template('mongodb/mongodb.conf.erb'),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => template($template),
     require => Package[$package],
   }
 

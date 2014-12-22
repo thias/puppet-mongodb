@@ -14,8 +14,10 @@ the one included in the Fedora/EPEL package.
 
 ## Examples
 
-    class { 'mongodb':
-      bind_ip => '0.0.0.0',
-      verbose => 'true',
-    }
+```puppet
+class { '::mongodb':
+  bind_ip => '0.0.0.0',
+  verbose => 'true',
+}
+```
 

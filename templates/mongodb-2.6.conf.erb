@@ -1,0 +1,182 @@
+##
+### Basic Defaults
+##
+bind_ip = <%= @bind_ip %>
+port = <%= @port %>
+fork = true
+pidfilepath = <%= @pidfilepath %>
+logpath = <%= @logpath %>
+dbpath = <%= @dbpath %>
+journal = true
+
+# Enables periodic logging of CPU utilization and I/O wait
+#cpu = true
+
+# Turn on/off security.  Off is currently the default
+#noauth = true
+<% if @auth == 'true' -%>
+auth = true
+<% else -%>
+#auth = true
+<% end -%>
+
+# Verbose logging output.
+<% if @verbose -%>
+verbose = <%= @verbose %>
+<% else -%>
+#verbose = true
+<% end -%>
+
+# Inspect all client data for validity on receipt (useful for
+# developing drivers)
+<% if @objcheck -%>
+objcheck = <%= @objcheck %>
+<% else -%>
+#objcheck = true
+<% end -%>
+
+# Enable db quota management
+<% if @quota -%>
+quota = <%= @quota %>
+<% else -%>
+#quota = true
+<% end -%>
+
+# Set oplogging level where n is
+#   0=off (default)
+#   1=W
+#   2=R
+#   3=both
+#   7=W+some reads
+<% if @oplog -%>
+oplog = <%= @oplog %>
+<% else -%>
+#oplog = 0
+<% end -%>
+
+# Diagnostic/debugging option
+#nocursors = true
+
+# Ignore query hints
+#nohints = true
+
+# Disable the HTTP interface (Defaults to port+1000).
+nohttpinterface = true
+
+# Turns off server-side scripting.  This will result in greatly limited
+# functionality
+#noscripting = true
+
+# Turns off table scans.  Any query that would do a table scan fails.
+#notablescan = true
+
+# Disable data file preallocation.
+#noprealloc = true
+
+# Specify .ns file size for new databases.
+# nssize = <size>
+
+# Accout token for Mongo monitoring server.
+#mms-token = <token>
+
+# Server name for Mongo monitoring server.
+#mms-name = <server-name>
+
+# Ping interval for Mongo monitoring server.
+#mms-interval = <seconds>
+
+# Replication Options
+
+# in replicated mongo databases, specify here whether this is a slave or master
+<% if @slave -%>
+slave = <%= @slave %>
+<% if @source -%>
+source = <%= @source %>
+<% else -%>
+#source = master.example.com
+<% end -%>
+<% else -%>
+#slave = true
+#source = master.example.com
+<% end -%>
+# Slave only: specify a single database to replicate
+<% if @slave and @only -%>
+only = <%= @only %>
+<% else -%>
+#only = master.example.com
+<% end -%>
+# or
+<% if @master -%>
+master = <%= @master %>
+<% if @source -%>
+source = <%= @source %>
+<% else -%>
+#source = slave.example.com
+<% end -%>
+<% else -%>
+#master = true
+#source = slave.example.com
+<% end -%>
+
+# Address of a server to pair with.
+<% if @pairwith -%>
+pairwith = <%= @pairwith %>
+<% else -%>
+#pairwith = <server:port>
+<% end -%>
+# Address of arbiter server.
+<% if @arbiter -%>
+arbiter = <%= @arbiter %>
+<% else -%>
+#arbiter = <server:port>
+<% end -%>
+# Automatically resync if slave data is stale
+<% if @autoresync -%>
+autoresync = <%= @autoresync %>
+<% else -%>
+#autoresync
+<% end -%>
+# Custom size for replication operation log.
+<% if @oplogSize -%>
+oplogSize = <%= @oplogSize %>
+<% else -%>
+#oplogSize = <MB>
+<% end -%>
+# Size limit for in-memory storage of op ids.
+<% if @opidmem -%>
+opIdMem = <%= @opidmem %>
+<% else -%>
+#opIdMem = <bytes>
+<% end -%>
+<% if @rest -%>
+# Simple REST API
+rest = <%= @rest %>
+<% end -%>
+<% if @replset -%>
+# Configures a replica set name for all hosts
+replSet = <%= @replset %>
+<% end -%>
+<% if @keyfile -%>
+# Key file to store authentication information
+keyFile = <%= @keyfile %>
+<% end -%>
+<% if @smallfiles -%>
+# Mode where MongoDB uses a smaller default file size
+smallfiles = <%= @smallfiles %>
+<% end -%>
+<% if !@extra_options.empty? -%>
+# Extra options
+<% @extra_options.sort_by {|key, value| key}.each do |key,value| -%>
+<%= key %> = <%= value %>
+<% end -%>
+<% end -%>
+
+# Sharding options
+
+# Proper port and bind_ip should be set
+# Or unset port option and use default values
+
+# Default port 27019
+#configsvr = true
+# Default port 27018
+#shardsvr = true
