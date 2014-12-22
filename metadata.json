@@ -1,9 +1,9 @@
 {
   "name": "thias-mongodb",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Matthias Saou",
   "license": "Apache-2.0",
-  "summary": "MongoDB module",
+  "summary": "MongoDB simple module",
   "source": "https://github.com/thias/puppet-mongodb",
   "project_page": "https://forge.puppetlabs.com/thias/mongodb",
   "issues_url": "https://github.com/thias/puppet-mongodb/issues",
@@ -27,6 +27,10 @@
     }
   ],
   "requirements": [
+    {
+    "name": "pe",
+    "version_requirement": "3.x"
+    },
     {
     "name": "puppet",
     "version_requirement": ">=2.7.20 <4.0.0"
