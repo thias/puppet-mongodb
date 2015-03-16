@@ -1,3 +1,5 @@
+* Add mongod_version fact.
+
 #### 2014-12-22 - 1.0.1
 * Lowercase parameters in missing places.
 
