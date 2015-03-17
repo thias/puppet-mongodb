@@ -1,4 +1,5 @@
 * Add mongod_version fact.
+* Add mongod.conf template from 3.0.0.
 
 #### 2014-12-22 - 1.0.1
 * Lowercase parameters in missing places.

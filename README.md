@@ -26,7 +26,6 @@ class { '::mongodb':
   rest    => 'true',
   replset => 'rs0',
   keyfile => '/etc/mongodb.key',
-  verbose => 'true',
 }
 ```
 

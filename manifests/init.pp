@@ -22,7 +22,7 @@ class mongodb (
   $pidfilepath    = $::mongodb::params::pidfilepath,
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
-  $logpath        = '/var/log/mongodb/mongodb.log',
+  $logpath        = $::mongodb::params::logpath,
   $bind_ip        = '127.0.0.1',
   $port           = '27017',
   $dbpath         = '/var/lib/mongodb',
