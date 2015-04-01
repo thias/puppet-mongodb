@@ -1,3 +1,4 @@
+#### 2015-04-01 - 1.0.2
 * Add mongod_version fact.
 * Add mongod.conf template from 3.0.0.
 
