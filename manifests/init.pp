@@ -24,10 +24,10 @@ class mongodb (
   # set in the configuration file.
   $logpath        = $::mongodb::params::logpath,
   $bind_ip        = '127.0.0.1',
-  $port           = '27017',
   $dbpath         = '/var/lib/mongodb',
   $auth           = undef,
-  $verbose        = undef,
+  $verbose        = undef, # old
+  $verbosity      = undef, # new yaml
   $objcheck       = undef,
   $quota          = undef,
   $oplog          = undef,
@@ -37,13 +37,25 @@ class mongodb (
   $pairwith       = undef,
   $arbiter        = undef,
   $autoresync     = undef,
-  $oplogsize      = undef,
+  $oplogsize      = undef, # old
+  $oplogsizemb    = undef, # new yaml
   $opidmem        = undef,
   $rest           = undef,
-  $replset        = undef,
+  $replset        = undef, # old
+  $replsetname    = undef, # new yaml
   $keyfile        = undef,
   $smallfiles     = undef,
   $extra_options  = {},
+  # New YAML configuration
+  $systemlog_verbosity     = undef,
+  $storage_dbpath          = '/var/lib/mongodb',
+  $storage_engine          = undef,
+  $net_bindip              = '127.0.0.1',
+  $net_port                = '27017',
+  $security_keyfile        = undef,
+  $replication_oplogsizemb = undef,
+  $replication_replsetname = undef,
+  
 ) inherits ::mongodb::params {
 
   # Main package and service

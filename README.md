@@ -20,12 +20,28 @@ the one included in the Fedora/EPEL packages.
 mongodb::key { '/etc/mongodb.key':
   content => 'c9otjehasAvlactocPiphAgC9',
 }
+```
+
+For MongoDB 2.x :
+
+```puppet
 class { '::mongodb':
   bind_ip => '0.0.0.0',
   auth    => 'true',
   rest    => 'true',
   replset => 'rs0',
   keyfile => '/etc/mongodb.key',
+}
+```
+
+For MongoDB 3.x :
+
+```puppet
+class { '::mongodb':
+  storage_engine          => 'wiredTiger',
+  net_bindip              => '0.0.0.0',
+  security_keyfile        => '/etc/mongodb.key',
+  replication_replsetname => 'rs0',
 }
 ```
 
