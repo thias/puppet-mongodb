@@ -20,10 +20,13 @@ net:
   port: <%= @net_port %>
   unixDomainSocket:
     pathPrefix: '/var/run/mongodb'
+<% if @security_keyfile -%>
 security:
   <%- if @security_keyfile -%>
   keyFile: '<%= @security_keyfile %>'
   <%- end -%>
+<% end -%>
+<% if @replication_oplogsizemb or @replication_replsetname -%>
 replication:
   <%- if @replication_oplogsizemb -%>
   oplogSizeMB: <%= @replication_oplogsizemb %>
@@ -31,4 +34,5 @@ replication:
   <%- if @replication_replsetname -%>
   replSetName: '<%= @replication_replsetname %>'
   <%- end -%>
+<% end -%>
 
