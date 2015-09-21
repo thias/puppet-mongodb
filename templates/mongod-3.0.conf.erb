@@ -20,8 +20,11 @@ net:
   port: <%= @net_port %>
   unixDomainSocket:
     pathPrefix: '/var/run/mongodb'
-<% if @security_keyfile -%>
+<% if @security_keyfile or @authorization -%>
 security:
+  <%- if @authorization -%>
+  authorization: '<%= @authorization %>'
+  <%- end -%>
   <%- if @security_keyfile -%>
   keyFile: '<%= @security_keyfile %>'
   <%- end -%>
