@@ -1,3 +1,5 @@
+* Add optional backup script and cron job (@forgodssake).
+
 #### 2016-06-09 - 1.0.3
 * Switch to the YAML configuration for 3.x to allow using wiredTiger engine.
 * Add authorization option (#1, @forgodssake).
