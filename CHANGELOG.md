@@ -1,4 +1,6 @@
-* Switch to the YAML configuration for 3.x to allow using wiredTiger engine
+#### 2016-06-09 - 1.0.3
+* Switch to the YAML configuration for 3.x to allow using wiredTiger engine.
+* Add authorization option (#1, @forgodssake).
 
 #### 2015-04-01 - 1.0.2
 * Add mongod_version fact.
