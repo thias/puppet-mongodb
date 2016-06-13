@@ -1,4 +1,6 @@
+#### 2016-06-13 - 1.0.4
 * Add optional backup script and cron job (@forgodssake).
+* Fix versioncmp (#3, @edupr91).
 
 #### 2016-06-09 - 1.0.3
 * Switch to the YAML configuration for 3.x to allow using wiredTiger engine.
