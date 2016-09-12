@@ -1,3 +1,6 @@
+#### 2016-09-12 - 1.0.5
+* Fix port variable for 2.4 and 2.6 configs (@sp-borja-juncosa, #4).
+
 #### 2016-06-13 - 1.0.4
 * Add optional backup script and cron job (@forgodssake).
 * Fix versioncmp (#3, @edupr91).
