@@ -11,6 +11,7 @@ class mongodb::backup (
   $cron_user = 'root',
   $oplog = undef,
   $compression_method = 'bzip2',
+  $compression_args = '',
   $mail_content = 'quiet',
   $mail_maxattsize = '4000',
   $mail_addr = undef,
@@ -22,6 +23,7 @@ class mongodb::backup (
   $weeklyretention = 4,
   $domonthly = true,
   $monthlyretention = -1,
+  $post_backup = undef,
 ) {
 
   # Ensure that the package for the mail command is installed
