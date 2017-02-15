@@ -1,3 +1,6 @@
+#### 2017-02-15 - 1.0.6
+* Allow more compression options & post backup parameter (@forgodssake, #5).
+
 #### 2016-09-12 - 1.0.5
 * Fix port variable for 2.4 and 2.6 configs (@sp-borja-juncosa, #4).
 
