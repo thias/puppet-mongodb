@@ -9,48 +9,58 @@
 #  include mongodb::params
 #
 class mongodb::params (
-  $mongod_version = $::mongod_version,
+  $mongod_version = "$::mongod_version",
 ) {
-  # service
-  case $::operatingsystem {
-    'Debian','Ubuntu': {
-      $service = 'mongodb'
-    }
-    default: {
-      $service = 'mongod'
-    }
-  }
-  # template & pidfilepath & logpath
+  # progname for config, pid and log file as it differs sometime
   case $::operatingsystem {
     'RedHat','CentOS': {
-      if versioncmp($::operatingsystemrelease, '7') >= 0 {
-        if versioncmp($mongod_version, '3') >= 0 {
-          $conffile = '/etc/mongod.conf'
-          $template = "${module_name}/mongod-3.0.conf.erb"
-        } else {
-          $conffile = '/etc/mongodb.conf'
-          $template = "${module_name}/mongodb-2.6.conf.erb"
-        }
-        $pidfilepath = '/var/run/mongodb/mongod.pid'
-        $logpath = '/var/log/mongodb/mongod.log'
+      if (versioncmp("$::operatingsystemrelease", '7') >= 0 or versioncmp("$mongod_version", '2.6') >= 0) {
+          $progname = 'mongod'
       } else {
-        $conffile = '/etc/mongodb.conf'
-        $template = "${module_name}/mongodb-2.4.conf.erb"
-        $pidfilepath = '/var/run/mongodb/mongodb.pid'
-        $logpath = '/var/log/mongodb/mongodb.log'
+          $progname = 'mongodb'
       }
     }
     default: {
-      $conffile = '/etc/mongodb.conf'
-      $template = "${module_name}/mongodb-2.4.conf.erb"
+          $progname = 'mongodb'
+    }
+  }
+
+  # service
+  case $::operatingsystem {
+    'RedHat','CentOS': {
+      $service = "mongod"
+    }
+    default: {
+      $service = "${progname}"
+    }
+  }
+
+  # template 
+	if versioncmp("$mongod_version", '3.0') >= 0 {
+	  $template = "${module_name}/mongod-3.0.conf.erb"
+	} elsif versioncmp("$mongod_version", '2.6') >= 0 {
+	  $template = "${module_name}/mongod-2.6.conf.erb"
+	} else {
+    $template = "${module_name}/mongodb-2.4.conf.erb"
+	}
+
+  # conffile, pidfilepath & logpath
+  case $::operatingsystem {
+    'RedHat','CentOS': {
+      $conffile = "/etc/${progname}.conf"
+      $pidfilepath = "/var/run/mongodb/${progname}.pid"
+      $logpath = "/var/log/mongodb/${progname}.log"
+    }
+    default: {
+      $conffile = "/etc/${progname}.conf"
       $pidfilepath = '/var/run/mongodb/mongodb.pid'
       $logpath = '/var/log/mongodb/mongodb.log'
     }
   }
+
   # package
   case $::operatingsystem {
     'Gentoo': { $package = 'dev-db/mongodb' }
-    default:  { $package = [ 'mongodb', 'mongodb-server' ] }
+    default:  { $package = [ "mongodb", "mongodb-server" ] }
   }
 }
-
