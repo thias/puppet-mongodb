@@ -43,7 +43,9 @@ class mongodb::params (
   }
 
   # template 
-	if versioncmp("$mongod_version", '3.0') >= 0 {
+	if versioncmp("$mongod_version", '3.4') >= 0 {
+    $template = "${module_name}/mongod-3.4.conf.erb"
+  } elsif versioncmp("$mongod_version", '3.0') >= 0 {
 	  $template = "${module_name}/mongod-3.0.conf.erb"
 	} elsif versioncmp("$mongod_version", '2.6') >= 0 {
 	  $template = "${module_name}/mongod-2.6.conf.erb"
