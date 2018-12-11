@@ -9,8 +9,15 @@
 #  include mongodb::params
 #
 class mongodb::params (
-  $mongod_version = "$::mongod_version",
+  $mongod_version = hiera(mongodb::version, "$::mongod_version"),
+  $scl_name       = hiera(mongodb::scl_name, '')
 ) {
+  # sclo
+  if ($scl_name and $::operatingsystem =~ /RedHat|CentOS/) {
+    $scl_prefix="${scl_name}-"
+    $scl_spath="/opt/rh/${scl_name}"
+  }
+
   # progname for config, pid and log file as it differs sometime
   case $::operatingsystem {
     'RedHat','CentOS': {
@@ -28,7 +35,7 @@ class mongodb::params (
   # service
   case $::operatingsystem {
     'RedHat','CentOS': {
-      $service = "mongod"
+      $service = "${scl_prefix}mongod"
     }
     default: {
       $service = "${progname}"
@@ -44,23 +51,16 @@ class mongodb::params (
     $template = "${module_name}/mongodb-2.4.conf.erb"
 	}
 
-  # conffile, pidfilepath & logpath
-  case $::operatingsystem {
-    'RedHat','CentOS': {
-      $conffile = "/etc/${progname}.conf"
-      $pidfilepath = "/var/run/mongodb/${progname}.pid"
-      $logpath = "/var/log/mongodb/${progname}.log"
-    }
-    default: {
-      $conffile = "/etc/${progname}.conf"
-      $pidfilepath = '/var/run/mongodb/mongodb.pid'
-      $logpath = '/var/log/mongodb/mongodb.log'
-    }
-  }
+  # paths
+  $conffile = "/etc${scl_spath}/${progname}.conf"
+  $dbpath = "/var${scl_spath}/lib/mongodb"
+  $runpath = "/var${scl_spath}/run/mongodb"
+  $pidfilepath = "${runpath}/${progname}.pid"
+  $logpath = "/var${scl_spath}/log/mongodb/${progname}.log"
 
   # package
   case $::operatingsystem {
     'Gentoo': { $package = 'dev-db/mongodb' }
-    default:  { $package = [ "mongodb", "mongodb-server" ] }
+    default:  { $package = [ "${scl_prefix}mongodb", "${scl_prefix}mongodb-server" ] }
   }
 }

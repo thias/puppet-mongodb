@@ -18,7 +18,7 @@ pidfilepath = <%= @pidfilepath %>
 logpath = <%= @logpath %>
 
 # Alternative directory for UNIX domain sockets (defaults to /tmp)
-unixSocketPrefix = /var/run/mongodb
+unixSocketPrefix = <%= @runpath %>
 
 # Directory for datafiles (defaults to /data/db/)
 dbpath = <%= @dbpath %>
