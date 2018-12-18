@@ -20,6 +20,8 @@ class mongodb::auth (
   $root_dbname    = 'admin',
   $users          = {},
 ) {
+  require mongodb
+
   # Create mandatory root user with empty rc
   exec { 'mongo-rc-root-init':
     path    => [ '/bin', '/usr/bin', ],
