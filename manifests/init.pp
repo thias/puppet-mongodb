@@ -19,12 +19,13 @@ class mongodb (
   $conffile       = $::mongodb::params::conffile,
   $package        = $::mongodb::params::package,
   $template       = $::mongodb::params::template,
+  $runpath        = $::mongodb::params::runpath,
   $pidfilepath    = $::mongodb::params::pidfilepath,
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
   $logpath        = $::mongodb::params::logpath,
   $bind_ip        = '127.0.0.1',
-  $dbpath         = '/var/lib/mongodb',
+  $dbpath         = $::mongodb::params::dbpath,
   $auth           = undef,
   $verbose        = undef, # old
   $verbosity      = undef, # new yaml
@@ -56,7 +57,7 @@ class mongodb (
   $security_keyfile        = undef,
   $replication_oplogsizemb = undef,
   $replication_replsetname = undef,
-  
+  $scl_name       = $::mongodb::params::scl_name,
 ) inherits ::mongodb::params {
 
   # Main package and service

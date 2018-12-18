@@ -1,0 +1,154 @@
+##
+## For list of options visit:
+## https://docs.mongodb.org/manual/reference/configuration-options/
+##
+
+# systemLog Options - How to do logging
+systemLog:
+  # The default log message verbosity level for components (0-5)
+  <%- if @systemlog_verbosity -%>
+  verbosity: <%= @systemlog_verbosity %>
+  <%- else -%>
+  verbosity: 0
+  <%- end -%>
+
+  # The destination to which MongoDB sends all log output (file|syslog, if not specifed to STDOUT)
+  destination: file
+
+  # Log file to send write to instead of stdout - has to be a file, not directory
+  path: <%= @logpath %>
+
+  # Append to logpath instead of over-writing (false by default)
+  logAppend: true
+
+  # Set the log rotation behavior (rename|reopen, rename by default)
+  logRotate: reopen
+
+
+# processManagement Options - How the process runs
+processManagement:
+  # Fork server process (false by default)
+  fork: true
+
+  # Full path to pidfile (if not set, no pidfile is created)
+  pidFilePath: <%= @pidfilepath %>
+
+
+# net Options - Network interfaces settings
+net:
+  # Specify port number (27017 by default)
+  port: <%= @net_port %>
+
+  # Comma separated list of ip addresses to listen on (all local ips by default)
+  bindIp: <%= @net_bindip %>
+
+  # Enable IPv6 support (disabled by default)
+  ipv6: false
+
+  unixDomainSocket:
+    # Enable/disable listening on the UNIX domain socket (true by default)
+    enabled: true
+
+    # Alternative directory for UNIX domain sockets (defaults to /tmp)
+    pathPrefix: <%= @runpath %>
+
+  #ssl:
+    # Set the SSL operation mode (disabled|allowSSL|preferSSL|requireSSL)
+    #mode: <string>
+
+    # PEM file for ssl
+    #PEMKeyFile: <string>
+
+    # Certificate Authority file for SSL
+    #CAFile: <string>
+
+
+# storage Options - How and Where to store data
+storage:
+  # Directory for datafiles (defaults to /data/db/)
+  dbPath: <%= @storage_dbpath %>
+
+  #journal:
+    # Enable/Disable journaling (journaling is on by default for 64 bit)
+    #enabled: true
+
+  # The storage engine for the mongod database (mmapv1|wiredTiger, wiredTiger by default
+  # - works for 64 bit only)
+  # Also possible to use unstable engines: devnull|ephemeralForTest
+  <%- if @storage_engine -%>
+  engine: <%= @storage_engine %>
+  <% else -%>
+  engine: wiredTiger
+  <% end -%>
+
+  #mmapv1:
+    # Enable or disable the preallocation of data files (true by default)
+    #preallocDataFiles: <boolean>
+
+    # Use a smaller default file size (false by default)
+    #smallFiles: <boolean>
+
+  #wiredTiger:
+    #engineConfig:
+      # The maximum size of the cache that WiredTiger will use for all data
+      # (max(60% of RAM - 1GB, 1GB) by default)
+      #cacheSizeGB: 5
+
+      # The type of compression to use to compress WiredTiger journal data
+      # (none|snappy|zlib, snappy by default)
+      #journalCompressor: <string>
+
+    #collectionConfig:
+      # The default type of compression to use to compress collection data
+      # (none|snappy|zlib, snappy by default)
+      #blockCompressor: <string>
+
+
+# secutiry Options - Authorization and other security settings
+<% if @security_keyfile or @authorization -%>
+security:
+  # Private key for cluster authentication
+  <%- if @security_keyfile -%>
+  keyFile: <%= @security_keyfile %>
+  <%- else -%>
+  #keyFile: <string>
+  <%- end -%>
+
+  # Run with/without security (enabled|disabled, disabled by default)
+  <%- if @authorization -%>
+  authorization: <%= @authorization %>
+  <%- else -%>
+  #authorization
+  <%- end -%>
+<% else -%>
+#security:
+  # Private key for cluster authentication
+  #keyFile: <string>
+
+  # Run with/without security (enabled|disabled, disabled by default)
+  #authorization
+<% end -%>
+
+
+# setParameter Options - Set MongoDB server parameters
+# setParameter:
+
+# opratrionProfiling Options - Profiling settings
+#operationProfiling:
+
+# replication Options - ReplSet settings
+<% if @replication_oplogsizemb or @replication_replsetname -%>
+replication:
+  <%- if @replication_oplogsizemb -%>
+  oplogSizeMB: <%= @replication_oplogsizemb %>
+  <%- end -%>
+  <%- if @replication_replsetname -%>
+  replSetName: <%= @replication_replsetname %>
+  <%- end -%>
+<% else -%>
+#replication:
+<% end -%>
+
+# sharding Options - Shard settings
+#sharding:
+

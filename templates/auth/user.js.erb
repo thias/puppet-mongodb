@@ -1,0 +1,119 @@
+// Initialize variables with arguments passed by eval option
+// or defined using ERB template
+
+var _dbnane, _username, _password, _roles
+
+if (typeof dbname == "string") {
+  _dbname = dbname
+} else {
+  _dbname = "<%= @dbname %>"
+}
+if (typeof username == "string") {
+  _username = username
+} else {
+  _username = "<%= @username %>"
+}
+if (typeof password == "string") {
+  _password = password
+} else {
+  _password = "<%= @password %>"
+}
+if (typeof roles == "object") {
+  _roles = roles
+} else {
+  // Via string to avoid syntax error
+  _roles = JSON.parse('<%= @roles %>')
+}
+
+// Exit with error in case of wrong parameters
+if (typeof _dbname != "string") {
+  print("Parameter dbname type is " + typeof _dbname)
+  quit(1)
+}
+if (typeof _username != "string") {
+  print("Parameter username type is " + typeof _username)
+  quit(1)
+}
+if (typeof _password != "string") {
+  print("Parameter password type is " + typeof _password)
+  quit(1)
+}
+if (typeof _roles != "object") {
+  print("Parameter roles type is " + typeof _roles)
+  quit(1)
+}
+
+// Open the selected DB
+print("Opening DB \'" + _dbname + "\'")
+db = db.getSiblingDB(_dbname);
+
+// Expand roles to make the default db explicit
+// and ease later comparison
+var _xroles = []
+for (var i in _roles) {
+  if (typeof _roles[i] == 'string') {
+    _xroles.push({ role: _roles[i], db: _dbname })
+  } else {
+    _xroles.push(_roles[i])
+  }
+}
+
+// Create the initial root user if required
+if (_xroles[0]['role'] == 'root' && db.serverStatus().code == 13) {
+  print("User \'" + _username + "\' needs to be created")
+  db.createUser({
+    user: _username,
+    pwd: _password,
+    roles: _roles
+  })
+} else {
+  // Create custom roles if not existing
+  // They will inherit from readWrite by default
+  // and SHOULD be updated externaly later
+  for (var i in _xroles) {
+    if (db.getRole(_xroles[i]['role']) === null) {
+      print("Role \'" + _xroles[i]['role'] + "\' was not found")
+      db.createRole({
+        role: _xroles[i]['role'],
+        privileges: [],
+        roles: [ "readWrite" ]
+      })
+    } else {
+      print("Role \'" + _xroles[i]['role'] + "\' already exists")
+    }
+  }
+
+  // Extract user info if existing
+  var user = db.getUser(_username)
+
+  // Create the user if not existing
+  if (user == null) {
+    print("User \'" + _username + "\' was not found")
+    db.createUser({
+      user: _username,
+      pwd: _password,
+      roles: _roles
+    })
+  } else {
+    print("User \'" + _username + "\' already exists")
+
+    // Update the _roles if not matching
+    // TODO: sort _roles before comparison
+    if (JSON.stringify(user.roles) != JSON.stringify(_xroles)) {
+      print("roles need to be updated for user \'" + _username + "\'")
+      db.updateUser(
+        _username,
+        { roles: _xroles }
+      )
+    }
+
+    // Update the _password if not matching
+    if (db.auth(_username, _password) != 1) {
+      print("password needs to be updated for user \'" + _username + "\'")
+      db.updateUser(
+        _username,
+        { pwd: _password }
+      )
+    }
+  }
+}

@@ -9,48 +9,60 @@
 #  include mongodb::params
 #
 class mongodb::params (
-  $mongod_version = $::mongod_version,
+  $mongod_version = hiera(mongodb::version, "$::mongod_version"),
+  $scl_name       = hiera(mongodb::scl_name, '')
 ) {
-  # service
-  case $::operatingsystem {
-    'Debian','Ubuntu': {
-      $service = 'mongodb'
-    }
-    default: {
-      $service = 'mongod'
-    }
+  # sclo
+  if ($scl_name and $::operatingsystem =~ /RedHat|CentOS/) {
+    $scl_prefix="${scl_name}-"
+    $scl_spath="/opt/rh/${scl_name}"
   }
-  # template & pidfilepath & logpath
+
+  # progname for config, pid and log file as it differs sometime
   case $::operatingsystem {
     'RedHat','CentOS': {
-      if versioncmp($::operatingsystemrelease, '7') >= 0 {
-        if versioncmp($mongod_version, '3') >= 0 {
-          $conffile = '/etc/mongod.conf'
-          $template = "${module_name}/mongod-3.0.conf.erb"
-        } else {
-          $conffile = '/etc/mongodb.conf'
-          $template = "${module_name}/mongodb-2.6.conf.erb"
-        }
-        $pidfilepath = '/var/run/mongodb/mongod.pid'
-        $logpath = '/var/log/mongodb/mongod.log'
+      if (versioncmp("$::operatingsystemrelease", '7') >= 0 or versioncmp("$mongod_version", '2.6') >= 0) {
+          $progname = 'mongod'
       } else {
-        $conffile = '/etc/mongodb.conf'
-        $template = "${module_name}/mongodb-2.4.conf.erb"
-        $pidfilepath = '/var/run/mongodb/mongodb.pid'
-        $logpath = '/var/log/mongodb/mongodb.log'
+          $progname = 'mongodb'
       }
     }
     default: {
-      $conffile = '/etc/mongodb.conf'
-      $template = "${module_name}/mongodb-2.4.conf.erb"
-      $pidfilepath = '/var/run/mongodb/mongodb.pid'
-      $logpath = '/var/log/mongodb/mongodb.log'
+          $progname = 'mongodb'
     }
   }
+
+  # service
+  case $::operatingsystem {
+    'RedHat','CentOS': {
+      $service = "${scl_prefix}mongod"
+    }
+    default: {
+      $service = "${progname}"
+    }
+  }
+
+  # template 
+	if versioncmp("$mongod_version", '3.4') >= 0 {
+    $template = "${module_name}/mongod-3.4.conf.erb"
+  } elsif versioncmp("$mongod_version", '3.0') >= 0 {
+	  $template = "${module_name}/mongod-3.0.conf.erb"
+	} elsif versioncmp("$mongod_version", '2.6') >= 0 {
+	  $template = "${module_name}/mongod-2.6.conf.erb"
+	} else {
+    $template = "${module_name}/mongodb-2.4.conf.erb"
+	}
+
+  # paths
+  $conffile = "/etc${scl_spath}/${progname}.conf"
+  $dbpath = "/var${scl_spath}/lib/mongodb"
+  $runpath = "/var${scl_spath}/run/mongodb"
+  $pidfilepath = "${runpath}/${progname}.pid"
+  $logpath = "/var${scl_spath}/log/mongodb/${progname}.log"
+
   # package
   case $::operatingsystem {
     'Gentoo': { $package = 'dev-db/mongodb' }
-    default:  { $package = [ 'mongodb', 'mongodb-server' ] }
+    default:  { $package = [ "${scl_prefix}mongodb", "${scl_prefix}mongodb-server" ] }
   }
 }
-
