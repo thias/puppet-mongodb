@@ -28,7 +28,14 @@ define mongodb::auth::user (
   $local_username	= false,
   $local_userhome = false,
 ) {
+  require mongodb
   include mongodb::auth
+
+  # Make sure root user is created first
+  # Just in case the resource is called directly
+  if ($username != $mongodb::auth::root_username) {
+    Mongodb::Auth::User["$mongodb::auth::root_username"] -> Exec["user-${username}"]
+  }
 
   $net_port = $mongodb::net_port
 
