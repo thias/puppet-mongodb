@@ -1,3 +1,6 @@
+#### 2019-01-21 - 1.0.7
+* Skip backup when it's supposed to be (#6, @edupr91).
+
 #### 2017-02-15 - 1.0.6
 * Allow more compression options & post backup parameter (@forgodssake, #5).
 
