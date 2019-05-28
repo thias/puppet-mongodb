@@ -29,6 +29,14 @@ security:
   keyFile: '<%= @security_keyfile %>'
   <%- end -%>
 <% end -%>
+<% if !@set_parameter.empty? -%>
+setParameter:
+<% @set_parameter.sort_by {|key, value| key}.each do |key,value| -%>
+  <%= key %>: <%= value %>
+<% end -%>
+<% else -%>
+# setParameters:
+<% end -%>
 <% if @replication_oplogsizemb or @replication_replsetname -%>
 replication:
   <%- if @replication_oplogsizemb -%>
