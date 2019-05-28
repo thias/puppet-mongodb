@@ -44,7 +44,7 @@ if (typeof _roles != "object") {
 }
 
 // Open the selected DB
-print("Opening DB \'" + _dbname + "\'")
+print("Using DB \'" + _dbname + "\'")
 db = db.getSiblingDB(_dbname);
 
 // Expand roles to make the default db explicit
@@ -71,9 +71,15 @@ if (_xroles[0]['role'] == 'root' && db.serverStatus().code == 13) {
   // They will inherit from readWrite by default
   // and SHOULD be updated externaly later
   for (var i in _xroles) {
-    if (db.getRole(_xroles[i]['role']) === null) {
+  	if (_xroles[i]['db'] != _dbname ) {
+	  print("Using DB \'" + _xroles[i]['db'] + "\' for role management")
+	  _dbrole = db.getSiblingDB(_xroles[i]['db'])
+    } else {
+      _dbrole = db
+    }
+    if (_dbrole.getRole(_xroles[i]['role']) === null) {
       print("Role \'" + _xroles[i]['role'] + "\' was not found")
-      db.createRole({
+      _dbrole.createRole({
         role: _xroles[i]['role'],
         privileges: [],
         roles: [ "readWrite" ]

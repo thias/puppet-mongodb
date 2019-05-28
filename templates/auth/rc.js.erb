@@ -1,2 +1,1 @@
-db = connect("localhost:<%= @net_port %>/<%= @dbname %>")
-db.getSiblingDB("<%= @dbname %>").auth("<%= @username %>", "<%= @password %>")
+db = connect("mongodb://<%= @username %>:<%= @password %>@localhost:<%= @net_port %>/<%= @dbname %>")
