@@ -66,8 +66,15 @@ class mongodb::params (
     default:  { $package = [ "${scl_prefix}mongodb", "${scl_prefix}mongodb-server" ] }
   }
 
-  case $::operatingsystem {
-    'Gentoo': { $package_tools = 'dev-db/mongo-tools' }
-    default:  { $package_tools = "${scl_prefix}mongo-tools" }
+  if versioncmp("$mongod_version", '2.6') <= 0 {
+	  case $::operatingsystem {
+	    /(Debian|Ubuntu)/: { $package_tools = 'mongodb-clients' }
+	    default:  { $package_tools = false }
+	  }
+  } else {
+	  case $::operatingsystem {
+	    'Gentoo': { $package_tools = 'dev-db/mongo-tools' }
+	    default:  { $package_tools = "${scl_prefix}mongo-tools" }
+	  }
   }
 }
