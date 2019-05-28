@@ -1,0 +1,25 @@
+#!/bin/bash
+
+PROGNAME=$(basename $0)
+RCF="${HOME}/.mongorc.js"
+
+# Parse mongorc file to extract authentication info if possible
+if [ -r ${RCF} ]; then 
+  OLDIFS=$IFS
+  IFS=' '
+  AUTH=($(sed -r -n 's/^(db = connect\(.)(.+):\/\/(.+):(.+)@(.+):(.+)\/(.+)(.\))/\2 \3 \4 \5 \6 \7/ p' ${HOME}/.mongorc.js))
+  IFS=$OLDIFS
+fi
+
+# Extract variable with default value if needed
+PROTO="${AUTH[0]:-mongodb}"
+UNAME="${AUTH[1]:-${USER}}"
+PASS="${AUTH[2]:-}"
+HNAME="${AUTH[3]:-localhost}"
+PORT="${AUTH[4]:-27017}"
+DBNAME="${AUTH[5]:-admin}"
+
+# Prepare wrapping command and execute
+CMD="<% if @scl_name %>scl enable <%= @scl_name %> -- <%= @scl_spath %>/root/usr/bin/<% end %>${PROGNAME}"
+
+exec ${CMD} --host="${HNAME}" --port="${PORT}" --username="${UNAME}" --password="${PASS}" --authenticationDatabase="${DBNAME}" ${*}
