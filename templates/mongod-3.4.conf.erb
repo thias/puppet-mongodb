@@ -131,7 +131,14 @@ security:
 
 
 # setParameter Options - Set MongoDB server parameters
-# setParameter:
+<% if !@set_parameter.empty? -%>
+setParameter:
+<% @set_parameter.sort_by {|key, value| key}.each do |key,value| -%>
+  <%= key %>: <%= value %>
+<% end -%>
+<% else -%>
+# setParameters:
+<% end -%>
 
 # opratrionProfiling Options - Profiling settings
 #operationProfiling:

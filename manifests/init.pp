@@ -57,6 +57,7 @@ class mongodb (
   $security_keyfile        = undef,
   $replication_oplogsizemb = undef,
   $replication_replsetname = undef,
+  $set_parameter           = {},
   $scl_name       = $::mongodb::params::scl_name,
   $tools          = false, # do not install tools by default
 ) inherits ::mongodb::params {
