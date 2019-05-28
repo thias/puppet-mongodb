@@ -60,9 +60,14 @@ class mongodb::params (
   $pidfilepath = "${runpath}/${progname}.pid"
   $logpath = "/var${scl_spath}/log/mongodb/${progname}.log"
 
-  # package
+  # package(s)
   case $::operatingsystem {
     'Gentoo': { $package = 'dev-db/mongodb' }
     default:  { $package = [ "${scl_prefix}mongodb", "${scl_prefix}mongodb-server" ] }
+  }
+
+  case $::operatingsystem {
+    'Gentoo': { $package_tools = 'dev-db/mongo-tools' }
+    default:  { $package_tools = "${scl_prefix}mongo-tools" }
   }
 }

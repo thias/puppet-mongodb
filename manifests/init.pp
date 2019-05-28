@@ -58,6 +58,7 @@ class mongodb (
   $replication_oplogsizemb = undef,
   $replication_replsetname = undef,
   $scl_name       = $::mongodb::params::scl_name,
+  $tools          = false, # do not install tools by default
 ) inherits ::mongodb::params {
 
   # Main package and service
@@ -79,5 +80,23 @@ class mongodb (
     require => Package[$package],
   }
 
-}
+  if ($tools) {
+    package { $package_tools: ensure => 'installed' } ->
 
+    file { 'mongotools-wrapper':
+      path    => '/usr/local/bin/mongotools',
+      content => template('mongodb/mongotools.erb'),
+      mode    => '0755',
+    } ->
+
+    file { 'mongodump-lnk':
+      path    => '/usr/local/bin/mongodump',
+      ensure  => './mongotools',
+    } ->
+
+    file { 'mongorestore-lnk':
+      path    => '/usr/local/bin/mongorestore',
+      ensure  => './mongotools',
+    }
+  }
+}
