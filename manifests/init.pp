@@ -81,7 +81,12 @@ class mongodb (
   }
 
   if ($tools) {
-    package { $package_tools: ensure => 'installed' } ->
+    if ($package_tools) {
+    	package { $package_tools:
+    	  ensure => 'installed',
+        before => File['mongotools-wrapper'],
+      }
+    }
 
     file { 'mongotools-wrapper':
       path    => '/usr/local/bin/mongotools',
