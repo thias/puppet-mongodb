@@ -85,10 +85,13 @@ EOF
       }
 
       if ($local_username) {
-        file { "mongo-rc-${local_username}":
+        file { "mongo-rc-${username}":
           path      => "${rc_path}",
           content   => template('mongodb/auth/rc.js.erb'),
-          owner     => "${local_username}",
+          owner     => "${local_username}" ? {
+            true		=> "${username}",
+            default	=> "${local_username}",
+          },
           mode      => '0600',
           require   => Exec["user-${username}"],
           show_diff => false,
