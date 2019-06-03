@@ -75,8 +75,8 @@ keyFile = <%= @keyfile %>
 #nounixsocket = true
 
 # Run with/without security (without by default)
-<% if @auth == 'true' -%>
-auth = true
+<% if @auth -%>
+auth = <%= @auth %>
 <% else -%>
 #auth = true
 <% end -%>

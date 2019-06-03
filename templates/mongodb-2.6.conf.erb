@@ -14,8 +14,8 @@ journal = true
 
 # Turn on/off security.  Off is currently the default
 #noauth = true
-<% if @auth == 'true' -%>
-auth = true
+<% if @auth -%>
+auth = <%= @auth %>
 <% else -%>
 #auth = true
 <% end -%>
