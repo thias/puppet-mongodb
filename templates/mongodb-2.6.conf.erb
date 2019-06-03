@@ -170,6 +170,7 @@ smallfiles = <%= @smallfiles %>
 <%= key %> = <%= value %>
 <% end -%>
 <% end -%>
+<% if !@set_parameter.empty? -%>
 # setParameter options
 <% @set_parameter.sort_by {|key, value| key}.each do |key,value| -%>
 setParameter = <%= key %>=<%= value %>
