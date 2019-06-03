@@ -96,6 +96,25 @@ class mongodb (
     before  => Service[$service],
   }
 
+  # Dealing with dual config option for dbpath
+  # TODO: deprecate storage_dbpath and use only db_path
+  if (versioncmp("$mongod_version", '3.0') < 0) {
+    $_dbpath = $dbpath
+  } else {
+    $_dbpath = $storage_dbpath
+  }
+
+	file { 'mongo-data-dir':
+	  path   => $_dbpath,
+		ensure => directory,
+		owner  => $owner,
+		group  => 'root',
+		mode	 => '0750',
+		recurse => false,
+    require => Package[$package],
+    before  => Service[$service],
+	}
+
   if ($tools) {
     if ($package_tools) {
     	package { $package_tools:
