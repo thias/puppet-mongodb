@@ -49,7 +49,7 @@ class mongodb (
   $extra_options  = {},
   # New YAML configuration
   $systemlog_verbosity     = undef,
-  $storage_dbpath          = '/var/lib/mongodb',
+  $storage_dbpath          = $::mongodb::params::dbpath,
   $storage_engine          = undef,
   $net_bindip              = '127.0.0.1',
   $net_port                = '27017',
