@@ -19,7 +19,7 @@ net:
   bindIp: <%= @net_bindip %>
   port: <%= @net_port %>
   unixDomainSocket:
-    pathPrefix: '/var/run/mongodb'
+    pathPrefix: '<%= @runpath %>'
 <% if @security_keyfile or @authorization -%>
 security:
   <%- if @authorization -%>
@@ -28,6 +28,14 @@ security:
   <%- if @security_keyfile -%>
   keyFile: '<%= @security_keyfile %>'
   <%- end -%>
+<% end -%>
+<% if !@set_parameter.empty? -%>
+setParameter:
+<% @set_parameter.sort_by {|key, value| key}.each do |key,value| -%>
+  <%= key %>: <%= value %>
+<% end -%>
+<% else -%>
+# setParameters:
 <% end -%>
 <% if @replication_oplogsizemb or @replication_replsetname -%>
 replication:

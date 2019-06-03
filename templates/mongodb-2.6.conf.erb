@@ -14,8 +14,8 @@ journal = true
 
 # Turn on/off security.  Off is currently the default
 #noauth = true
-<% if @auth == 'true' -%>
-auth = true
+<% if @auth -%>
+auth = <%= @auth %>
 <% else -%>
 #auth = true
 <% end -%>
@@ -168,6 +168,12 @@ smallfiles = <%= @smallfiles %>
 # Extra options
 <% @extra_options.sort_by {|key, value| key}.each do |key,value| -%>
 <%= key %> = <%= value %>
+<% end -%>
+<% end -%>
+<% if !@set_parameter.empty? -%>
+# setParameter options
+<% @set_parameter.sort_by {|key, value| key}.each do |key,value| -%>
+setParameter = <%= key %>=<%= value %>
 <% end -%>
 <% end -%>
 
