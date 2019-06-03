@@ -60,6 +60,10 @@ class mongodb::params (
   $pidfilepath = "${runpath}/${progname}.pid"
   $logpath = "/var${scl_spath}/log/mongodb/${progname}.log"
 
+	# process and file ownership
+	$owner = 'mongodb'
+	$group = 'mongodb'
+
   # package(s)
   case $::operatingsystem {
     'Gentoo': { $package = 'dev-db/mongodb' }
