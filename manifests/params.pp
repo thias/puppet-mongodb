@@ -16,6 +16,9 @@ class mongodb::params (
   if ($scl_name and $::operatingsystem =~ /RedHat|CentOS/) {
     $scl_prefix="${scl_name}-"
     $scl_spath="/opt/rh/${scl_name}"
+  } else {
+    $scl_prefix=''
+    $scl_spath=''
   }
 
   # progname for config, pid and log file as it differs sometime
