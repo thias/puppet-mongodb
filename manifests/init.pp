@@ -24,6 +24,8 @@ class mongodb (
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
   $logpath        = $::mongodb::params::logpath,
+  $owner          = $::mongodb::params::owner,
+  $group          = $::mongodb::params::group,
   $bind_ip        = '127.0.0.1',
   $dbpath         = $::mongodb::params::dbpath,
   $auth           = undef,
@@ -79,6 +81,19 @@ class mongodb (
     mode    => '0644',
     content => template($template),
     require => Package[$package],
+  }
+
+  # Manage log directory, required if not same as package default
+  $logdir = inline_template("<%= File.dirname(@logpath) %>")
+
+  file { 'mongo-log-dir':
+    path		=> $logdir,
+    owner   => $owner,
+    group   => $group,
+    mode    => '0750',
+    recurse => false,
+    require => Package[$package],
+    before  => Service[$service],
   }
 
   if ($tools) {
