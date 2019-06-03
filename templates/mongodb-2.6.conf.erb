@@ -170,6 +170,11 @@ smallfiles = <%= @smallfiles %>
 <%= key %> = <%= value %>
 <% end -%>
 <% end -%>
+# setParameter options
+<% @set_parameter.sort_by {|key, value| key}.each do |key,value| -%>
+setParameter = <%= key %>=<%= value %>
+<% end -%>
+<% end -%>
 
 # Sharding options
 
