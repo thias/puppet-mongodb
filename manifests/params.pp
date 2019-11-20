@@ -24,7 +24,6 @@ class mongodb::params (
   case $::operatingsystem {
     'RedHat','CentOS': {
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
-        $m_with_systemd = true
         if versioncmp($mongod_version, '3') >= 0 {
           $conffile = '/etc/mongod.conf'
           $template = "${module_name}/mongod-3.0.conf.erb"
@@ -34,11 +33,13 @@ class mongodb::params (
         }
         $pidfilepath = '/var/run/mongodb/mongod.pid'
         $logpath = '/var/log/mongodb/mongod.log'
+        $with_systemd = true
       } else {
         $conffile = '/etc/mongodb.conf'
         $template = "${module_name}/mongodb-2.4.conf.erb"
         $pidfilepath = '/var/run/mongodb/mongodb.pid'
         $logpath = '/var/log/mongodb/mongodb.log'
+        $with_systemd = false
       }
     }
     default: {
@@ -46,6 +47,7 @@ class mongodb::params (
       $template = "${module_name}/mongodb-2.4.conf.erb"
       $pidfilepath = '/var/run/mongodb/mongodb.pid'
       $logpath = '/var/log/mongodb/mongodb.log'
+      $with_systemd = false
     }
   }
   # package

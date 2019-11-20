@@ -1,3 +1,6 @@
+#### 2019-11-20 - 1.0.8
+* Change systemd LimitNPROC default to 48000 (#9, @osgpcq).
+
 #### 2019-01-21 - 1.0.7
 * Skip backup when it's supposed to be (#6, @edupr91).
 

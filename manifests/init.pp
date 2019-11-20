@@ -20,7 +20,7 @@ class mongodb (
   $package        = $::mongodb::params::package,
   $template       = $::mongodb::params::template,
   $pidfilepath    = $::mongodb::params::pidfilepath,
-  $m_with_systemd = $::mongodb::params::m_with_systemd,
+  $with_systemd   = $::mongodb::params::with_systemd,
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
   $logpath        = $::mongodb::params::logpath,
@@ -79,24 +79,24 @@ class mongodb (
     content => template($template),
     require => Package[$package],
   }
-  if $m_with_systemd {
-    include '::rhel::systemd'
+  if $with_systemd {
+    exec { 'mongodb systemctl daemon-reload':
+      command     => 'systemctl daemon-reload',
+      path        => $::path,
+      refreshonly => true,
+    }
     file { "/etc/systemd/system/${service}.service.d":
-      ensure  => 'directory',
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0755',
-      seluser => 'system_u',
-      seltype => 'systemd_unit_file_t',
+      ensure => 'directory',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
     }
     file { "/etc/systemd/system/${service}.service.d/${service}.conf":
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
-      seluser => 'system_u',
-      seltype => 'systemd_unit_file_t',
       content => "[Service]\nLimitNPROC=${mongo_LimitNPROC}\n",
-      notify  => Exec['systemctl daemon-reload'],
+      notify  => Exec['mongodb systemctl daemon-reload'],
     }
   }
 
