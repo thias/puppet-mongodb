@@ -20,6 +20,7 @@ class mongodb (
   $package        = $::mongodb::params::package,
   $template       = $::mongodb::params::template,
   $pidfilepath    = $::mongodb::params::pidfilepath,
+  $m_with_systemd = $::mongodb::params::m_with_systemd,
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
   $logpath        = $::mongodb::params::logpath,
@@ -56,6 +57,7 @@ class mongodb (
   $security_keyfile        = undef,
   $replication_oplogsizemb = undef,
   $replication_replsetname = undef,
+  $mongo_LimitNPROC        = '48000',
   
 ) inherits ::mongodb::params {
 
@@ -76,6 +78,26 @@ class mongodb (
     mode    => '0644',
     content => template($template),
     require => Package[$package],
+  }
+  if $m_with_systemd {
+    include '::rhel::systemd'
+    file { "/etc/systemd/system/${service}.service.d":
+      ensure  => 'directory',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0755',
+      seluser => 'system_u',
+      seltype => 'systemd_unit_file_t',
+    }
+    file { "/etc/systemd/system/${service}.service.d/${service}.conf":
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      seluser => 'system_u',
+      seltype => 'systemd_unit_file_t',
+      content => "[Service]\nLimitNPROC=${mongo_LimitNPROC}\n",
+      notify  => Exec['systemctl daemon-reload'],
+    }
   }
 
 }

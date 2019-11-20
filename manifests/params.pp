@@ -24,6 +24,7 @@ class mongodb::params (
   case $::operatingsystem {
     'RedHat','CentOS': {
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
+        $m_with_systemd = true
         if versioncmp($mongod_version, '3') >= 0 {
           $conffile = '/etc/mongod.conf'
           $template = "${module_name}/mongod-3.0.conf.erb"
