@@ -21,6 +21,7 @@ class mongodb (
   $template       = $::mongodb::params::template,
   $runpath        = $::mongodb::params::runpath,
   $pidfilepath    = $::mongodb::params::pidfilepath,
+  $with_systemd   = $::mongodb::params::with_systemd,
   # Just in case you wonder : quoted 'false' is for true/false text to be
   # set in the configuration file.
   $logpath        = $::mongodb::params::logpath,
@@ -59,6 +60,7 @@ class mongodb (
   $security_keyfile        = undef,
   $replication_oplogsizemb = undef,
   $replication_replsetname = undef,
+  $mongo_LimitNPROC        = '48000',
   $set_parameter           = {},
   $scl_name       = $::mongodb::params::scl_name,
   $tools          = false, # do not install tools by default
@@ -81,6 +83,26 @@ class mongodb (
     mode    => '0644',
     content => template($template),
     require => Package[$package],
+  }
+  if $with_systemd {
+    exec { 'mongodb systemctl daemon-reload':
+      command     => 'systemctl daemon-reload',
+      path        => $::path,
+      refreshonly => true,
+    }
+    file { "/etc/systemd/system/${service}.service.d":
+      ensure => 'directory',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+    }
+    file { "/etc/systemd/system/${service}.service.d/${service}.conf":
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => "[Service]\nLimitNPROC=${mongo_LimitNPROC}\n",
+      notify  => Exec['mongodb systemctl daemon-reload'],
+    }
   }
 
   # Manage log directory, required if not same as package default

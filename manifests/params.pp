@@ -24,14 +24,21 @@ class mongodb::params (
   # progname for config, pid and log file as it differs sometime
   case $::operatingsystem {
     'RedHat','CentOS': {
-      if (versioncmp("$::operatingsystemrelease", '7') >= 0 or versioncmp("$mongod_version", '2.6') >= 0) {
+      if versioncmp($::operatingsystemrelease, '7') >= 0 {
+        if versioncmp($mongod_version, '2.6') >= 0 {
           $progname = 'mongod'
-      } else {
+        } else {
           $progname = 'mongodb'
+        }
+        $with_systemd = true
+      } else {
+        $progname = 'mongodb'
+        $with_systemd = false
       }
     }
     default: {
-          $progname = 'mongodb'
+      $progname = 'mongodb'
+      $with_systemd = false
     }
   }
 

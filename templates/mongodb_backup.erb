@@ -571,6 +571,11 @@ elif [[ $DODAILY = "yes" ]] ; then
 
 fi
 
+if [ -z "$FILE" ]; then
+  echo Filename not defined. Backup no need it.
+  exit 0
+fi
+
 # Calculating the full filename
 if [ -n "$COMP" ]; then
   [ "$COMP" = "gzip" ] || [ "$COMP" = "pigz" ] && FILENAME="$FILE.gz"
