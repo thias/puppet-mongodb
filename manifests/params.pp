@@ -25,7 +25,7 @@ class mongodb::params (
   case $::operatingsystem {
     'RedHat','CentOS': {
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
-        if versioncmp($mongod_version, '2.6') >= 0 {
+        if versioncmp("$mongod_version", '2.6') >= 0 {
           $progname = 'mongod'
         } else {
           $progname = 'mongodb'
