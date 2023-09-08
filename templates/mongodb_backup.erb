@@ -23,6 +23,9 @@
 # (Detailed instructions below variables)
 #=====================================================================
 
+# This will ensure that the pipefail option is set for the entire script, allowing it to detect failures from any command in a pipeline.
+set -o pipefail
+
 # Database name to specify a specific database only e.g. myawesomeapp
 # Unnecessary if backup all databases
 # DBNAME=""
@@ -71,6 +74,9 @@ MAXATTSIZE="<%= @mail_maxattsize %>"
 <%- if @mail_addr -%>
 MAILADDR="<%= @mail_addr %>"
 <%- end -%>
+
+# We set the mongod_backup_divide as defined in hieradata
+DIVIDE_BACKUP="<%= @divide %>"
 
 # ============================================================================
 # === SCHEDULING AND RETENTION OPTIONS ( Read the doc's below for details )===
@@ -122,7 +128,15 @@ REQUIREDBAUTHDB="yes"
 <%- end -%>
 
 # Command to run before backups (uncomment to use)
-PREBACKUP=""
+PREBACKUP="
+  # Check if mongodump is running
+  if pgrep mongodump; then
+    echo 'mongodump is currently running. Please wait for it to complete.'
+    exit 1
+  else
+    echo 'mongodump is not running. Proceeding...'
+  fi
+"
 
 # Command run after backups (uncomment to use)
 POSTBACKUP="<%= @post_backup -%>"
@@ -300,7 +314,7 @@ W=`date +%V`                                      # Week Number e.g 37
 VER=0.10                                          # Version Number
 LOGFILE=$BACKUPDIR/$DBHOST-`date +%H%M`.log       # Logfile Name
 LOGERR=$BACKUPDIR/ERRORS_$DBHOST-`date +%H%M`.log # Logfile Name
-MONGODUMP_pipe=mongodump_pipe_`date +%H%M`
+MONGODUMP_pipe=/tmp/mongodump_pipe_`date +%H%M%S`
 BACKUPFILES=""
 OPT=""                                            # OPT string for use with mongodump
 
@@ -358,62 +372,111 @@ exec 2> $LOGERR     # stderr replaced with file $LOGERR.
 dbdump () {
 
   if [ -n "$COMP" ]; then
-    # If we run the command in a sinble line "mongodump|gzip > file" we can't detect
-    # out of space, because gzip can't die without closing the input channel and
-    # we get stuck forever. By using named pipes, gzip/bzip2 can exit safely.
+    # Workaround to backup and then compress in serial
+    if [[ $DIVIDE_BACKUP == "true" ]]; then
+      # Run mongodump without compression
+      echo "Mongodump without compression started at $(date +'%Y-%m-%d %H:%M:%S %Z')" > "$LOGFILE"
+      mongodump --host=$DBHOST:$DBPORT --archive=$FILENAME.uncompressed $OPT
+      if [ "$?" -ne 0 ]; then
+        >&2 echo "Mongodump exited abnormally with status code $?."
+        if [ -s "$LOGERR" ]; then
+          >&2 echo "Error Log:"
+          cat "$LOGERR"
+        fi
+          rm $FILENAME.uncompressed
+          return 1
+      fi
+      echo "Mongodump without compression finished at $(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$LOGFILE"
+      # If COMP is defined, compress the output
+      if [ -n "$COMP" ]; then
+        echo "Compression of backup started at $(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$LOGFILE"
+        $COMP -c $COMP_ARGS < $FILENAME.uncompressed > $FILENAME
+        if [ "$?" -ne "0" ]; then
+          >&2 echo "Something went wrong in compression using $COMP."
+          rm $FILENAME
+          rm $FILENAME.uncompressed
+          return 1
+        fi
+        rm $FILENAME.uncompressed
+      else
+        mv $FILENAME.uncompressed $FILENAME
+      fi
+      echo "Compression ended at $(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$LOGFILE"
+      return 0
+  else
+      # If we run the command in a single line "mongodump|gzip > file" we can't detect
+      # out of space, because gzip can't die without closing the input channel and
+      # we get stuck forever. By using named pipes, gzip/bzip2 can exit safely.
+      # Check if the named pipe already exists
+      if [ -e $MONGODUMP_pipe ]; then
+        # Delete the existing named pipe
+        rm -f $MONGODUMP_pipe
+        if [ $? -ne 0 ]; then
+            >&2 echo "Error: Failed to delete old named pipe $MONGODUMP_pipe"
+            exit 1
+        fi
+      fi
+      # Create a new named pipe
+      mkfifo $MONGODUMP_pipe
+      if [ $? -ne 0 ]; then
+        >&2 echo "Error: Failed to create named pipe $MONGODUMP_pipe"
+        exit 1
+      fi
+      # Run the compress program and get the pid
+      echo "Compression AND Backup started at $(date +'%Y-%m-%d %H:%M:%S %Z')" > "$LOGFILE"
+      $COMP -c $COMP_ARGS < $MONGODUMP_pipe > $FILENAME &
+      COMP_pid=$!
 
-    # Creating the named pipe
-    mkfifo $MONGODUMP_pipe
+      # Run mongodump and get the pid
+      mongodump --host=$DBHOST:$DBPORT --archive $OPT  > $MONGODUMP_pipe &
+      MONGODUMP_pid=$!
 
-    # Run the compress program and get the pid
-    $COMP -c $COMP_ARGS < $MONGODUMP_pipe > $FILENAME &
-    COMP_pid=$!
+      # First, wait and check the status of mongodump
+      wait $MONGODUMP_pid;
+      if [ "$?" -ne 0 ]; then
+        >&2 echo "Mongodump exited abnormally. Mongodump pid is $MONGODUMP_pid"
+        kill -9 $COMP_pid  # kill the compressor if mongodump failed
+        if [ -s "$LOGERR" ]; then
+          >&2 echo "Error Log:"
+          echo "$(date +'%Y-%m-%d %H:%M:%S %Z') - Error occurred during the backup process. See $LOGERR for more details." >> "$LOGFILE"
+        fi
+        rm $FILENAME
+        rm $MONGODUMP_pipe
+        return 1
+      fi
 
-    # Run mongodump and get the pid
-    mongodump --host=$DBHOST:$DBPORT --archive $OPT  > $MONGODUMP_pipe &
-    MONGODUMP_pid=$!
+      # Then, wait and check the status of the compressor
+      wait $COMP_pid;
+      if [ "$?" -ne "0" ]; then
+        >&2 echo "Something went wrong in compression. $COMP pid is $COMP_pid"
 
-    # Wait until the compress program exits.
-    wait $COMP_pid 2> /dev/null;
+        # It won't die with just 1 normal kill
+        echo "Killing mongodump and cleaning files/pipe"
+        kill -9 $MONGODUMP_pid
 
-    if [ "$?" -ne "0" ]; then
-      >&2 echo "Something went wrong in compression. $COMP pid is $COMP_pid"
+        # Cleanup
+        rm $FILENAME
+        rm $MONGODUMP_pipe
 
-      # It won't die with just 1 normal kill
-      echo "Killing mongodump and cleaning files/pipe"
-      kill -9 $MONGODUMP_pid
-
-      # Cleanup
-      rm $FILENAME
+        return 1
+      fi
+      # Success Cleanup
       rm $MONGODUMP_pipe
-
-      return 1
+      echo "Compression AND Backup ended at $(date +'%Y-%m-%d %H:%M:%S %Z')" >> "$LOGFILE"
     fi
-
-    # Get the exit code of the mongodump
-    wait $MONGODUMP_pid 2> /dev/null;
-
-    if [ "$?" -ne "0" ]; then
-      >&2 echo "Mongodump exited adnormaly. Mongodump pid is $MONGODUMP_pid"
-
-      # Cleanup
-      rm $FILENAME
-      rm $MONGODUMP_pipe
-
-      return 1
-    fi
-
-    # Cleanup
-    rm $MONGODUMP_pipe
-
   else
     # Simpler case, just run the comand, wait and get the exit code
 
     # Run mongodump and get the pid
     mongodump --host=$DBHOST:$DBPORT --archive $OPT  > $FILENAME
 
-    if [ "$?" -ne "0" ]; then
-      echo "Mongodump exited adnormaly."
+    if [ "$?" -ne 0 ]; then
+      echo "Mongodump exited abnormally with status code $?. Mongodump pid is $MONGODUMP_pid"
+      if [ -s "$LOGERR" ]; then
+        echo "Error Log:"
+        cat "$LOGERR"
+      fi
+
 
       # Cleanup
       rm $FILENAME
@@ -479,6 +542,8 @@ post_backup () {
     return 0
 }
 
+echo "Script started at $(date +'%Y-%m-%d %H:%M:%S %Z')" > "$LOGFILE"
+
 # Run command before we begin
 if [ "$PREBACKUP" ]; then
     echo ======================================================================
@@ -526,6 +591,7 @@ echo Backup of Database Server - $HOST on $DBHOST
 echo ======================================================================
 
 echo Backup Start `date`
+echo "$(date +'%Y-%m-%d %H:%M:%S %Z') - Starting backup of Database Server - $HOST on $DBHOST" >> "$LOGFILE"
 echo ======================================================================
 # Monthly Full Backup of all Databases
 if [[ $DOM = "01" ]] && [[ $DOMONTHLY = "yes" ]]; then
@@ -589,6 +655,7 @@ dbdump && post_backup
 
 echo ----------------------------------------------------------------------
 echo Backup End Time `date`
+echo "$(date +'%Y-%m-%d %H:%M:%S %Z') - Backup completed" >> "$LOGFILE"
 echo ======================================================================
 
 echo Total disk space used for backup storage..
@@ -643,6 +710,15 @@ if [ -s "$LOGERR" ]; then
 fi
 
 # Clean up Logfile
-rm -f "$LOGFILE" "$LOGERR"
+#rm -f "$LOGFILE" "$LOGERR"
+# Backup directory for log files
+LOGBACKUPDIR="/var/log/mongodb-backup-logs"
+
+# Create backup directory if it doesn't exist
+mkdir -p "$LOGBACKUPDIR"
+
+# Move log files to the backup directory
+mv "$LOGFILE" "$LOGBACKUPDIR/"
+mv "$LOGERR" "$LOGBACKUPDIR/"
 
 exit $STATUS
