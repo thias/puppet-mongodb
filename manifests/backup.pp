@@ -24,6 +24,7 @@ class mongodb::backup (
   $domonthly = true,
   $monthlyretention = -1,
   $post_backup = undef,
+  $divide = false,
 ) {
 
   # Ensure that the package for the mail command is installed
